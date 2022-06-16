@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 public class Main {
-    public static final int NUMBER = 1_000_000;
+    public static final int NUMBER = 1_000;
     public static final int RANGE = 100_000_0000;
 
     public static void main(String[] args) throws InterruptedException {
@@ -12,20 +12,14 @@ public class Main {
         Map<Integer, Double> map2 = Collections.synchronizedMap(new HashMap<>());
 
         long startTime1 = System.currentTimeMillis();
-        ExecutorService executorService = saveToMap(map1);
-        executorService.awaitTermination(1, TimeUnit.MINUTES);
-
-        executorService = readFromMap(map1);
-        executorService.awaitTermination(1, TimeUnit.MINUTES);
+        saveToMap(map1);
+        readFromMap(map1);
         long finishTime1 = System.currentTimeMillis();
 
 
         long startTime2 = System.currentTimeMillis();
-        executorService = saveToMap(map2);
-        executorService.awaitTermination(1, TimeUnit.MINUTES);
-
-        executorService = readFromMap(map2);
-        executorService.awaitTermination(1, TimeUnit.MINUTES);
+        saveToMap(map2);
+        readFromMap(map2);
         long finishTime2 = System.currentTimeMillis();
 
 
@@ -38,7 +32,7 @@ public class Main {
 
     }
 
-    public static ExecutorService saveToMap(final Map<Integer, Double> map) {
+    public static void saveToMap(final Map<Integer, Double> map) throws InterruptedException {
         ExecutorService executorService = Executors.newCachedThreadPool();
         for (int i = 0; i < NUMBER; i++) {
             executorService.submit(() -> {
@@ -47,10 +41,10 @@ public class Main {
             });
         }
         executorService.shutdown();
-        return executorService;
+        executorService.awaitTermination(1, TimeUnit.MINUTES);
     }
 
-    public static ExecutorService readFromMap(Map<Integer, Double> map) {
+    public static void readFromMap(Map<Integer, Double> map) throws InterruptedException {
         ExecutorService executorService = Executors.newCachedThreadPool();
         for (Map.Entry<Integer, Double> item : map.entrySet()) {
             //executorService.submit(() -> System.out.println("Reading " + item.getKey() + " - " + item.getValue() + " " + Thread.currentThread().getName()));
@@ -58,7 +52,7 @@ public class Main {
             double b = item.getValue();
         }
         executorService.shutdown();
-        return executorService;
+        executorService.awaitTermination(1, TimeUnit.MINUTES);
     }
 }
 
